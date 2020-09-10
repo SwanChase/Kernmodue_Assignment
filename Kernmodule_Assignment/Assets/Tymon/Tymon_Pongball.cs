@@ -7,15 +7,19 @@ public class Tymon_Pongball
     /// <summary>
     /// The direction of the ball on the x-axis
     /// </summary>
-    private int dirX = 1;
+    private float dirX = 1;
     /// <summary>
     /// The direction of the ball on the y-axis
     /// </summary>
-    private int dirY = 1;
+    private float dirY = 1;
     /// <summary>
     /// The movement speed of the ball
     /// </summary>
     private float movementSpeed;
+    /// <summary>
+    /// Makes the ball go faster the more time gos on (resets when scored)
+    /// </summary>
+    private float movementSpeedScaler = 1;
     /// <summary>
     /// Reference to the pongball transform
     /// </summary>
@@ -53,7 +57,8 @@ public class Tymon_Pongball
     private void Movement()
     {
         // Move
-        pongball.position = new Vector3(pongball.position.x + dirX * movementSpeed * Time.deltaTime, pongball.position.y + dirY * movementSpeed * Time.deltaTime, 0);
+        movementSpeedScaler += Time.deltaTime * 0.1f;
+        pongball.position = new Vector3(pongball.position.x + dirX * movementSpeed * movementSpeedScaler * Time.deltaTime, pongball.position.y + dirY * movementSpeed * Time.deltaTime, 0);
         // Clamp inside camera view
         Vector3 pos = Camera.main.WorldToViewportPoint(pongball.position);
         pos.x = Mathf.Clamp01(pos.x);
@@ -61,15 +66,21 @@ public class Tymon_Pongball
         // Change dir if reached edge
         if(pos.x == 0)
         {
-            dirX = 1;
             // Touched left, point for player
+            dirX = 1;
             pos.x = 0.5f;
+            pos.y = 0.5f;
+            movementSpeedScaler = 1;
+            Tymon_Main.UpdateScore(new Vector2(0, 1));
         }
         else if(pos.x == 1)
         {
-            dirX = -1;
             // Touched right, point for enemy
+            dirX = -1;
             pos.x = 0.5f;
+            pos.y = 0.5f;
+            movementSpeedScaler = 1;
+            Tymon_Main.UpdateScore(new Vector2(1, 0));
         }
         if(pos.y == 0) dirY = 1; else if(pos.y == 1) dirY = -1;
         // Set ponball position relative to camea viewport
